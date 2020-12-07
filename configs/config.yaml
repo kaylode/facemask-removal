@@ -1,0 +1,30 @@
+settings:
+  root_dir: "datasets/places365_standard/"
+  checkpoint_path: "weights"
+  sample_folder: "sample"
+
+  cuda: True
+  lr: 0.001
+  batch_size: 2
+  num_workers: 4
+
+  step_size: 30
+  gamma: 0.1
+
+  d_num_layers: 3
+
+  visualize_per_iter: 1000
+  save_per_iter: 1000
+  print_per_iter: 10
+  num_epochs: 100
+
+  lambda_G: 1.0
+  lambda_rec_1: 100.0
+  lambda_rec_2: 100.0
+  lambda_per: 10.0
+
+  img_size: 256
+  max_angle: 4
+  max_len: 50
+  max_width: 20
+  times: 15
