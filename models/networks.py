@@ -236,5 +236,5 @@ class GANLoss(nn.Module):
         return target_tensor.expand_as(input)
 
     def __call__(self, input, target_is_real):
-        target_tensor = self.get_target_tensor(input, target_is_real)
+        target_tensor = self.get_target_tensor(input, target_is_real).to(input.device)
         return self.loss(input, target_tensor)

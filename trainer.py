@@ -39,6 +39,7 @@ class Trainer():
             iters = 0
 
         self.cfg = cfg
+        self.visualize_per_iter = cfg.visualize_per_iter
         self.print_per_iter = cfg.print_per_iter
         self.save_per_iter = cfg.save_per_iter
         self.epoch = epoch
