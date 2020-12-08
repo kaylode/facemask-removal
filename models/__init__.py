@@ -1,2 +1,1 @@
-from .networks import GatedGenerator, NLayerDiscriminator, GANLoss
-from .vgg import vgg19
+from .networks import GatedGenerator, NLayerDiscriminator, GANLoss, PerceptualNet

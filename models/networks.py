@@ -4,6 +4,7 @@ from torch.nn import Parameter
 import torch.nn.functional as F
 import torch.utils.data as data
 import functools
+from .vgg import vgg19, vgg16
 
 class GatedConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride = 1, padding = 0, dilation = 1, activation = 'lrelu', norm = 'in'):
@@ -238,3 +239,22 @@ class GANLoss(nn.Module):
     def __call__(self, input, target_is_real):
         target_tensor = self.get_target_tensor(input, target_is_real).to(input.device)
         return self.loss(input, target_tensor)
+
+
+class PerceptualNet(nn.Module):
+    def __init__(self, name = "vgg19"):
+        super(PerceptualNet, self).__init__()
+        if name == "vgg19":
+            self.net = vgg19(pretrained=True).features[:-2]
+        elif name == "vgg16":
+            self.net = vgg16(pretrained=True).features[:-2]
+        else:
+            assert "wrong model name"
+            
+        for param in self.net.parameters():
+            param.requires_grad = False
+
+        self.net.eval()
+
+    def forward(self, x):
+        return self.net(x)

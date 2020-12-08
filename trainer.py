@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.utils.data as data
 from torch.optim.lr_scheduler import StepLR
+from torchvision.utils import save_image
 
 from models import *
 from datasets import Places365Dataset
@@ -28,6 +29,11 @@ def get_epoch_iters(path):
 
     return epoch_idx, iter_idx
 
+def load_checkpoint(model_G, model_D, path):
+    state = torch.load(path,map_location='cpu')
+    model_G.load_state_dict(state['G'])
+    model_D.load_state_dict(state['D'])
+    print('Loaded checkpoint successfully')
 
 class Trainer():
     def __init__(self, args, cfg):
@@ -61,8 +67,10 @@ class Trainer():
 
         self.model_G = GatedGenerator().to(self.device)
         self.model_D = NLayerDiscriminator(cfg.d_num_layers, use_sigmoid=True).to(self.device)
-        self.model_P = vgg19(pretrained=True).features.to(self.device)[:-2]
-        self.model_P.eval()
+        self.model_P = PerceptualNet(name = "vgg19").to(self.device)
+
+        if args.resume is not None:
+            load_checkpoint(self.model_G, self.model_D, args.resume)
 
         self.criterion_adv = GANLoss()
         self.criterion_rec = nn.MSELoss()
@@ -74,19 +82,15 @@ class Trainer():
         self.scheduler_D = StepLR(self.optimizer_D, step_size=cfg.step_size, gamma=cfg.gamma)
         self.scheduler_G = StepLR(self.optimizer_G, step_size=cfg.step_size, gamma=cfg.gamma)
 
-    def validate(self, sample_folder, sample_name, img_list, name_list, pixel_max_cnt = 255):
-        for i in range(len(img_list)):
-            img = img_list[i]
-            # Recover normalization: * 255 because last layer is sigmoid activated
-            img = img * 255
-            # Process img_copy and do not destroy the data of img
-            img_copy = img.clone().data.permute(0, 2, 3, 1)[0, :, :, :].cpu().numpy()
-            img_copy = np.clip(img_copy, 0, pixel_max_cnt)
-            img_copy = img_copy.astype(np.uint8)
-            # Save to certain path
-            save_img_name = sample_name + '_' + name_list[i] + '.png'
-            save_img_path = os.path.join(sample_folder, save_img_name)
-            cv2.imwrite(save_img_path, img_copy)
+    def validate(self, sample_folder, sample_name, img_list):
+        save_img_path = os.path.join(sample_folder, sample_name+'.png') 
+        img_list  = [i.clone().cpu() for i in img_list]
+        imgs = torch.stack(img_list, dim=1)
+        # imgs shape: Bx5xCxWxH
+        batch_size = imgs.shape[0]
+        imgs = imgs.view(-1, *list(imgs.size())[2:])
+        save_image(imgs, save_img_path, nrow= batch_size * 5)
+        print(f"Save image to {save_img_path}")
 
     def fit(self):
         self.model_G.train()
@@ -195,9 +199,9 @@ class Trainer():
                         masked_imgs = imgs * (1 - masks) + masks
                         masks = torch.cat((masks, masks, masks), 1)
                         img_list = [imgs, masks, masked_imgs, first_out, second_out]
-                        name_list = ['gt', 'mask', 'masked_img', 'first_out', 'second_out']
+                        #name_list = ['gt', 'mask', 'masked_img', 'first_out', 'second_out']
                         filename = f"{self.epoch}_{str(self.iters)}"
-                        self.validate(self.cfg.sample_folder, filename , img_list, name_list, pixel_max_cnt = 255)
+                        self.validate(self.cfg.sample_folder, filename , img_list)
         
                 self.scheduler_D.step()
                 self.scheduler_G.step()
