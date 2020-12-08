@@ -222,39 +222,30 @@ class NLayerDiscriminator(nn.Module):
     def forward(self, input):
         return self.model(input)
 
-class GANLoss(nn.Module):
-    def __init__(self, target_real_label=1.0, target_fake_label=0.0):
-        super(GANLoss, self).__init__()
-        self.register_buffer('real_label', torch.tensor(target_real_label))
-        self.register_buffer('fake_label', torch.tensor(target_fake_label))
-        self.loss = nn.BCELoss()
-
-    def get_target_tensor(self, input, target_is_real):
-        if target_is_real:
-            target_tensor = self.real_label
-        else:
-            target_tensor = self.fake_label
-        return target_tensor.expand_as(input)
-
-    def __call__(self, input, target_is_real):
-        target_tensor = self.get_target_tensor(input, target_is_real).to(input.device)
-        return self.loss(input, target_tensor)
-
-
 class PerceptualNet(nn.Module):
     def __init__(self, name = "vgg19"):
         super(PerceptualNet, self).__init__()
         if name == "vgg19":
-            self.net = vgg19(pretrained=True).features[:-2]
+            net = vgg19(pretrained=True).features
+            self.out1 = nn.Sequential(*net[:19])
+            self.out2 = nn.Sequential(*net[19:28])
+            self.out3 = nn.Sequential(*net[28:])
         elif name == "vgg16":
-            self.net = vgg16(pretrained=True).features[:-2]
+            net = vgg16(pretrained=True).features
+            self.out1 = nn.Sequential(*net[:17])
+            self.out2 = nn.Sequential(*net[17:24])
+            self.out3 = nn.Sequential(*net[24:])
         else:
             assert "wrong model name"
-            
-        for param in self.net.parameters():
-            param.requires_grad = False
+        
+        for block in [self.out1, self.out2, self.out3]:
+            for param in block.parameters():
+                param.requires_grad = False
 
-        self.net.eval()
+            block.eval()
 
     def forward(self, x):
-        return self.net(x)
+        fm1 = self.out1(x)
+        fm2 = self.out2(fm1)
+        fm3 = self.out3(fm2)
+        return [fm1, fm2, fm3]

@@ -1,1 +1,1 @@
-from .networks import GatedGenerator, NLayerDiscriminator, GANLoss, PerceptualNet
+from .networks import GatedGenerator, NLayerDiscriminator, PerceptualNet

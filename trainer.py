@@ -11,8 +11,16 @@ import torch.utils.data as data
 from torch.optim.lr_scheduler import StepLR
 from torchvision.utils import save_image
 
+
 from models import *
+from losses import *
 from datasets import Places365Dataset
+
+
+def adjust_learning_rate(optimizer, gamma, num_steps=1):
+    for i in range(num_steps):
+        for param_group in optimizer.param_groups:
+            param_group['lr'] *= gamma
 
 def get_epoch_iters(path):
     path = os.path.basename(path)
@@ -45,6 +53,8 @@ class Trainer():
             iters = 0
 
         self.cfg = cfg
+        self.step_iters = cfg.step_iters
+        self.gamma = cfg.gamma
         self.visualize_per_iter = cfg.visualize_per_iter
         self.print_per_iter = cfg.print_per_iter
         self.save_per_iter = cfg.save_per_iter
@@ -73,23 +83,22 @@ class Trainer():
             load_checkpoint(self.model_G, self.model_D, args.resume)
 
         self.criterion_adv = GANLoss()
-        self.criterion_rec = nn.MSELoss()
+        self.criterion_rec = nn.L1Loss()
+        self.criterion_ssim = SSIM(window_size = 11)
         self.criterion_per = nn.L1Loss()
 
         self.optimizer_D = torch.optim.Adam(self.model_D.parameters(), lr=cfg.lr)
         self.optimizer_G = torch.optim.Adam(self.model_G.parameters(), lr=cfg.lr)
 
-        self.scheduler_D = StepLR(self.optimizer_D, step_size=cfg.step_size, gamma=cfg.gamma)
-        self.scheduler_G = StepLR(self.optimizer_G, step_size=cfg.step_size, gamma=cfg.gamma)
-
     def validate(self, sample_folder, sample_name, img_list):
         save_img_path = os.path.join(sample_folder, sample_name+'.png') 
         img_list  = [i.clone().cpu() for i in img_list]
         imgs = torch.stack(img_list, dim=1)
+
         # imgs shape: Bx5xCxWxH
-        batch_size = imgs.shape[0]
+
         imgs = imgs.view(-1, *list(imgs.size())[2:])
-        save_image(imgs, save_img_path, nrow= batch_size * 5)
+        save_image(imgs, save_img_path, nrow= 5)
         print(f"Save image to {save_img_path}")
 
     def fit(self):
@@ -146,13 +155,21 @@ class Trainer():
                     fake_D = None
                     
                     # Reconstruction loss
-                    loss_rec_1 = self.criterion_rec(first_out_wholeimg, imgs)
-                    loss_rec_2 = self.criterion_rec(second_out_wholeimg, imgs)
+                    loss_l1_1 = self.criterion_rec(first_out_wholeimg, imgs)
+                    loss_l1_2 = self.criterion_rec(second_out_wholeimg, imgs)
+                    loss_ssim_1 = self.criterion_ssim(first_out_wholeimg, imgs)
+                    loss_ssim_2 = self.criterion_ssim(second_out_wholeimg, imgs)
+
+                    loss_rec_1 = loss_l1_1 + (1 - loss_ssim_1)
+                    loss_rec_2 = loss_l1_2 + (1 - loss_ssim_2)
 
                     # Perceptual loss
                     img_featuremaps = self.model_P(imgs)                          
                     second_out_wholeimg_featuremaps = self.model_P(second_out_wholeimg)
-                    loss_P = self.criterion_per(second_out_wholeimg_featuremaps, img_featuremaps)
+
+                    loss_P = 0.0
+                    for map_idx in range(3):
+                        loss_P += 0.33*self.criterion_per(second_out_wholeimg_featuremaps[map_idx], img_featuremaps[map_idx])
 
                     loss = self.cfg.lambda_G * loss_G + self.cfg.lambda_rec_1 * loss_rec_1 + self.cfg.lambda_rec_2 * loss_rec_2 + self.cfg.lambda_per * loss_P
                     loss.backward()
@@ -193,7 +210,7 @@ class Trainer():
                             'D': self.model_D.state_dict(),
                             'G': self.model_G.state_dict(),
                         }, os.path.join(self.cfg.checkpoint_path, f"model_{self.epoch}_{self.iters}.pth"))
-                    
+               
                     # Visualize sample
                     if self.iters % self.visualize_per_iter == 0:
                         masked_imgs = imgs * (1 - masks) + masks
@@ -202,9 +219,6 @@ class Trainer():
                         #name_list = ['gt', 'mask', 'masked_img', 'first_out', 'second_out']
                         filename = f"{self.epoch}_{str(self.iters)}"
                         self.validate(self.cfg.sample_folder, filename , img_list)
-        
-                self.scheduler_D.step()
-                self.scheduler_G.step()
 
         except KeyboardInterrupt:
                 torch.save({
