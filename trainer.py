@@ -11,7 +11,7 @@ import torch.utils.data as data
 from torch.optim.lr_scheduler import StepLR
 
 from models import *
-from datasets import InpaintDataset
+from datasets import Places365Dataset
 
 def get_epoch_iters(path):
     path = os.path.basename(path)
@@ -47,7 +47,7 @@ class Trainer():
         self.num_epochs = cfg.num_epochs
         self.device = torch.device('cuda' if cfg.cuda else 'cpu')
 
-        trainset = Places365Dataset(img_dir=cfg.img_dir)
+        trainset = Places365Dataset(cfg)
 
         self.trainloader = data.DataLoader(
             trainset, 
@@ -114,6 +114,8 @@ class Trainer():
                     first_out_wholeimg = imgs * (1 - masks) + first_out * masks     
                     second_out_wholeimg = imgs * (1 - masks) + second_out * masks
 
+                    masks = masks.cpu()
+
                     # Train discriminator
                     self.optimizer_D.zero_grad()
 
@@ -128,6 +130,7 @@ class Trainer():
                     loss_D.backward()
                     self.optimizer_D.step()
 
+                    real_D = None
 
                     # Train Generator
                     self.optimizer_G.zero_grad()
@@ -135,6 +138,8 @@ class Trainer():
                     fake_D = self.model_D(second_out_wholeimg)
                     loss_G = self.criterion_adv(fake_D, target_is_real=True)
 
+                    fake_D = None
+                    
                     # Reconstruction loss
                     loss_rec_1 = self.criterion_rec(first_out_wholeimg, imgs)
                     loss_rec_2 = self.criterion_rec(second_out_wholeimg, imgs)
@@ -150,6 +155,7 @@ class Trainer():
 
                     end_time = time.time()
 
+                    imgs = imgs.cpu()
                     # Visualize number
                     running_time += (end_time - start_time)
                     running_loss['D'] += loss_D.item()

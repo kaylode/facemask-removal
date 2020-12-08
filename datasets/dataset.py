@@ -4,21 +4,28 @@ import torch.nn as nn
 import torch.utils.data as data
 import cv2
 import numpy as np
+from tqdm import tqdm
 
 class Places365Dataset(data.Dataset):
-    def __init__(self, root_dir, cfg):
-        self.root_dir = root_dir
+    def __init__(self, cfg):
+        self.root_dir = cfg.root_dir
         self.cfg = cfg
         self.load_images()
         
     def load_images(self):
         self.fns =[]
-        with open(os.path.join(self.root_dir, 'train.txt'), 'r') as f:
-            data = f.read()
-            lines = data.splitlines()
-            for line in lines:
-                self.fns.append(os.path.join(self.root_dir, line))
-            
+        idx = 0
+        img_paths = os.listdir(self.root_dir)
+        for cls_id in img_paths:
+            paths = os.path.join(self.root_dir, cls_id)
+            file_paths = os.listdir(paths)
+            for img_name in file_paths:
+                filename = os.path.join(paths, img_name)
+                self.fns.append(filename)
+
+
+                
+    
     def __getitem__(self, index):
         img_path = self.fns[index]
         img = cv2.imread(img_path)
