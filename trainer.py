@@ -58,7 +58,7 @@ class Trainer():
         self.visualize_per_iter = cfg.visualize_per_iter
         self.print_per_iter = cfg.print_per_iter
         self.save_per_iter = cfg.save_per_iter
-        self.epoch = epoch
+        
         self.start_iter = iters
         self.iters = 0
         self.num_epochs = cfg.num_epochs
@@ -73,6 +73,7 @@ class Trainer():
             pin_memory = True, 
             collate_fn = trainset.collate_fn)
 
+        self.epoch = int(self.start_iter / len(self.trainloader))
         self.num_iters = (self.num_epochs+1) * len(self.trainloader)
 
         self.model_G = GatedGenerator().to(self.device)
