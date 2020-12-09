@@ -124,15 +124,15 @@ class Trainer():
                     imgs = batch['imgs'].to(self.device)
                     masks = batch['masks'].to(self.device)
 
+                    # Train discriminator
+                    self.optimizer_D.zero_grad()
+
                     first_out, second_out = self.model_G(imgs, masks)
 
                     first_out_wholeimg = imgs * (1 - masks) + first_out * masks     
                     second_out_wholeimg = imgs * (1 - masks) + second_out * masks
 
                     masks = masks.cpu()
-
-                    # Train discriminator
-                    self.optimizer_D.zero_grad()
 
                     fake_D = self.model_D(second_out_wholeimg.detach())
                     real_D = self.model_D(imgs)
