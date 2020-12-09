@@ -74,7 +74,7 @@ class Trainer():
             collate_fn = trainset.collate_fn)
 
         self.epoch = int(self.start_iter / len(self.trainloader))
-        self.iters = int(self.start_iter % len(self.trainloader))
+        
         self.num_iters = (self.num_epochs+1) * len(self.trainloader)
 
         self.model_G = GatedGenerator().to(self.device)
@@ -127,7 +127,8 @@ class Trainer():
 
                     # Train discriminator
                     self.optimizer_D.zero_grad()
-
+                    self.optimizer_G.zero_grad()
+                    
                     first_out, second_out = self.model_G(imgs, masks)
 
                     first_out_wholeimg = imgs * (1 - masks) + first_out * masks     

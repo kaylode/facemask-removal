@@ -227,14 +227,14 @@ class PerceptualNet(nn.Module):
         super(PerceptualNet, self).__init__()
         if name == "vgg19":
             net = vgg19(pretrained=True).features
-            self.out1 = nn.Sequential(*net[:19])
-            self.out2 = nn.Sequential(*net[19:28])
-            self.out3 = nn.Sequential(*net[28:])
+            self.out1 = nn.Sequential(*net[:18])
+            self.out2 = nn.Sequential(*net[18:27])
+            self.out3 = nn.Sequential(*net[27:-1])
         elif name == "vgg16":
             net = vgg16(pretrained=True).features
-            self.out1 = nn.Sequential(*net[:17])
-            self.out2 = nn.Sequential(*net[17:24])
-            self.out3 = nn.Sequential(*net[24:])
+            self.out1 = nn.Sequential(*net[:16])
+            self.out2 = nn.Sequential(*net[16:23])
+            self.out3 = nn.Sequential(*net[23:-1])
         else:
             assert "wrong model name"
         
