@@ -74,6 +74,7 @@ class Trainer():
             collate_fn = trainset.collate_fn)
 
         self.epoch = int(self.start_iter / len(self.trainloader))
+        self.iters = int(self.start_iter % len(self.trainloader))
         self.num_iters = (self.num_epochs+1) * len(self.trainloader)
 
         self.model_G = GatedGenerator().to(self.device)
@@ -84,9 +85,9 @@ class Trainer():
             load_checkpoint(self.model_G, self.model_D, args.resume)
 
         self.criterion_adv = GANLoss()
-        self.criterion_rec = nn.L1Loss()
+        self.criterion_rec = nn.SmoothL1Loss()
         self.criterion_ssim = SSIM(window_size = 11)
-        self.criterion_per = nn.L1Loss()
+        self.criterion_per = nn.SmoothL1Loss()
 
         self.optimizer_D = torch.optim.Adam(self.model_D.parameters(), lr=cfg.lr)
         self.optimizer_G = torch.optim.Adam(self.model_G.parameters(), lr=cfg.lr)
@@ -187,7 +188,7 @@ class Trainer():
                     running_loss['R_1'] += (self.cfg.lambda_rec_1 * loss_rec_1.item())
                     running_loss['R_2'] += (self.cfg.lambda_rec_2 * loss_rec_2.item())
                     running_loss['T'] += loss.item()
-                    self.iters = self.start_iter + len(self.trainloader)*self.epoch + i + 1
+                    self.iters = self.start_iter  + i + 1
 
                     if self.iters % self.print_per_iter == 0:
                         for key in running_loss.keys():
