@@ -64,7 +64,7 @@ class Places365Dataset(data.Dataset):
             height = shape
             width = shape
             mask = np.zeros((height, width), np.float32)
-            times = np.random.randint(times)
+            times = np.random.randint(10, times)
             for i in range(times):
                 start_x = np.random.randint(width)
                 start_y = np.random.randint(height)

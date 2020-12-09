@@ -217,8 +217,8 @@ class Trainer():
                     # Visualize sample
                     if self.iters % self.visualize_per_iter == 0:
                         masked_imgs = imgs * (1 - masks) + masks
-                        masks = torch.cat((masks, masks, masks), 1)
-                        img_list = [imgs, masks, masked_imgs, first_out, second_out]
+                        
+                        img_list = [imgs, masked_imgs, first_out, second_out, second_out_wholeimg]
                         #name_list = ['gt', 'mask', 'masked_img', 'first_out', 'second_out']
                         filename = f"{self.epoch}_{str(self.iters)}"
                         self.validate(self.cfg.sample_folder, filename , img_list)
