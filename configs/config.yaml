@@ -26,5 +26,5 @@ settings:
   img_size: 256
   max_angle: 4
   max_len: 50
-  max_width: 20
+  max_width: 30
   times: 15
