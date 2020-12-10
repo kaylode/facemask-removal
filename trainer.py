@@ -189,7 +189,7 @@ class Trainer():
                     running_loss['R_1'] += (self.cfg.lambda_rec_1 * loss_rec_1.item())
                     running_loss['R_2'] += (self.cfg.lambda_rec_2 * loss_rec_2.item())
                     running_loss['T'] += loss.item()
-                    self.iters = self.start_iter  + i + 1
+                    self.iters = self.epoch * len(self.trainloader)  + i + 1
 
                     if self.iters % self.print_per_iter == 0:
                         for key in running_loss.keys():
