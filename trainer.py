@@ -79,7 +79,7 @@ class Trainer():
 
         self.model_G = GatedGenerator().to(self.device)
         self.model_D = NLayerDiscriminator(cfg.d_num_layers, use_sigmoid=True).to(self.device)
-        self.model_P = PerceptualNet(name = "vgg16").to(self.device)
+        self.model_P = PerceptualNet(name = "vgg16", resize=False).to(self.device)
 
         if args.resume is not None:
             load_checkpoint(self.model_G, self.model_D, args.resume)
