@@ -74,7 +74,7 @@ class Trainer():
             collate_fn = trainset.collate_fn)
 
         self.epoch = int(self.start_iter / len(self.trainloader))
-        
+        self.iters = self.start_iter
         self.num_iters = (self.num_epochs+1) * len(self.trainloader)
 
         self.model_G = GatedGenerator().to(self.device)
@@ -189,7 +189,7 @@ class Trainer():
                     running_loss['R_1'] += (self.cfg.lambda_rec_1 * loss_rec_1.item())
                     running_loss['R_2'] += (self.cfg.lambda_rec_2 * loss_rec_2.item())
                     running_loss['T'] += loss.item()
-                    self.iters = self.epoch * len(self.trainloader)  + i + 1
+                    
 
                     if self.iters % self.print_per_iter == 0:
                         for key in running_loss.keys():
@@ -222,6 +222,8 @@ class Trainer():
                         #name_list = ['gt', 'mask', 'masked_img', 'first_out', 'second_out']
                         filename = f"{self.epoch}_{str(self.iters)}"
                         self.validate(self.cfg.sample_folder, filename , img_list)
+
+                    self.iters += 1
 
         except KeyboardInterrupt:
                 torch.save({
