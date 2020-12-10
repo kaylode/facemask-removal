@@ -79,7 +79,7 @@ class Trainer():
 
         self.model_G = GatedGenerator().to(self.device)
         self.model_D = NLayerDiscriminator(cfg.d_num_layers, use_sigmoid=True).to(self.device)
-        self.model_P = PerceptualNet(name = "vgg19").to(self.device)
+        self.model_P = PerceptualNet(name = "vgg16").to(self.device)
 
         if args.resume is not None:
             load_checkpoint(self.model_G, self.model_D, args.resume)
@@ -167,12 +167,7 @@ class Trainer():
                     loss_rec_2 = loss_l1_2 + (1 - loss_ssim_2)
 
                     # Perceptual loss
-                    img_featuremaps = self.model_P(imgs)                          
-                    second_out_wholeimg_featuremaps = self.model_P(second_out_wholeimg)
-
-                    loss_P = 0.0
-                    for map_idx in range(3):
-                        loss_P += 0.33*self.criterion_per(second_out_wholeimg_featuremaps[map_idx], img_featuremaps[map_idx])
+                    loss_P  = self.model_P(second_out_wholeimg, imgs)                          
 
                     loss = self.cfg.lambda_G * loss_G + self.cfg.lambda_rec_1 * loss_rec_1 + self.cfg.lambda_rec_2 * loss_rec_2 + self.cfg.lambda_per * loss_P
                     loss.backward()
@@ -207,7 +202,7 @@ class Trainer():
                             'T': 0,
                         }
                         running_time = 0
-
+                    break
                     if self.iters % self.save_per_iter  == 0:
                         torch.save({
                             'D': self.model_D.state_dict(),

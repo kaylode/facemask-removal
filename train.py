@@ -8,7 +8,7 @@ def main(args, cfg):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training custom model')
-    parser.add_argument('--resume', default='weights', type=str, help='resume training')                   
+    parser.add_argument('--resume', default=None, type=str, help='resume training')                   
     args = parser.parse_args() 
 
     config = Config('./configs/config.yaml')

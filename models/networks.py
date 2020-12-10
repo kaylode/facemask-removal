@@ -4,7 +4,7 @@ from torch.nn import Parameter
 import torch.nn.functional as F
 import torch.utils.data as data
 import functools
-from .vgg import vgg19, vgg16
+from torchvision.models import vgg19, vgg16
 
 class GatedConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride = 1, padding = 0, dilation = 1, activation = 'lrelu', norm = 'in'):
@@ -223,29 +223,46 @@ class NLayerDiscriminator(nn.Module):
         return self.model(input)
 
 class PerceptualNet(nn.Module):
-    def __init__(self, name = "vgg19"):
+    # https://gist.github.com/alper111/8233cdb0414b4cb5853f2f730ab95a49
+    def __init__(self, name = "vgg19", resize=True):
         super(PerceptualNet, self).__init__()
+        blocks = []
         if name == "vgg19":
-            net = vgg19(pretrained=True).features
-            self.out1 = nn.Sequential(*net[:18])
-            self.out2 = nn.Sequential(*net[18:27])
-            self.out3 = nn.Sequential(*net[27:-1])
+            blocks.append(vgg19(pretrained=True).features[:4].eval())
+            blocks.append(vgg19(pretrained=True).features[4:9].eval())
+            blocks.append(vgg19(pretrained=True).features[9:16].eval())
+            blocks.append(vgg19(pretrained=True).features[16:23].eval())
         elif name == "vgg16":
-            net = vgg16(pretrained=True).features
-            self.out1 = nn.Sequential(*net[:16])
-            self.out2 = nn.Sequential(*net[16:23])
-            self.out3 = nn.Sequential(*net[23:-1])
+            blocks.append(vgg16(pretrained=True).features[:4].eval())
+            blocks.append(vgg16(pretrained=True).features[4:9].eval())
+            blocks.append(vgg16(pretrained=True).features[9:16].eval())
+            blocks.append(vgg16(pretrained=True).features[16:23].eval())
         else:
             assert "wrong model name"
         
-        for block in [self.out1, self.out2, self.out3]:
-            for param in block.parameters():
-                param.requires_grad = False
+        for bl in blocks:
+            for p in bl:
+                p.requires_grad = False
+        self.blocks = torch.nn.ModuleList(blocks)
+        self.transform = torch.nn.functional.interpolate
+        self.mean = torch.nn.Parameter(torch.tensor([0.485, 0.456, 0.406]).view(1,3,1,1))
+        self.std = torch.nn.Parameter(torch.tensor([0.229, 0.224, 0.225]).view(1,3,1,1))
+        self.resize = resize
 
-            block.eval()
-
-    def forward(self, x):
-        fm1 = self.out1(x)
-        fm2 = self.out2(fm1)
-        fm3 = self.out3(fm2)
-        return [fm1, fm2, fm3]
+    def forward(self, inputs, targets):
+        if inputs.shape[1] != 3:
+            inputs = inputs.repeat(1, 3, 1, 1)
+            targets = targets.repeat(1, 3, 1, 1)
+        inputs = (inputs-self.mean) / self.std
+        targets = (targets-self.mean) / self.std
+        if self.resize:
+            inputs = self.transform(inputs, mode='bilinear', size=(256, 256), align_corners=False)
+            targets = self.transform(targets, mode='bilinear', size=(256, 256), align_corners=False)
+        loss = 0.0
+        x = inputs
+        y = targets
+        for block in self.blocks:
+            x = block(x)
+            y = block(y)
+            loss += torch.nn.functional.l1_loss(x, y)
+        return loss
