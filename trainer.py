@@ -71,6 +71,7 @@ class Trainer():
             batch_size=cfg.batch_size,
             num_workers = cfg.num_workers,
             pin_memory = True, 
+            shuffle=True,
             collate_fn = trainset.collate_fn)
 
         self.epoch = int(self.start_iter / len(self.trainloader))
