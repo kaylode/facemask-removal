@@ -202,7 +202,7 @@ class Trainer():
                             'T': 0,
                         }
                         running_time = 0
-                    break
+                
                     if self.iters % self.save_per_iter  == 0:
                         torch.save({
                             'D': self.model_D.state_dict(),
