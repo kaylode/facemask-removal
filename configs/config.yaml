@@ -1,7 +1,7 @@
 settings:
   root_dir: "./datasets/places365_10classes"
-  checkpoint_path: "/content/drive/MyDrive/weights/Places365 Inpainting/phase 1"
-  sample_folder: "/content/drive/MyDrive/results/Places365 Inpainting/phase 1"
+  checkpoint_path: "/content/drive/MyDrive/weights/Places365 Inpainting/phase 2"
+  sample_folder: "/content/drive/MyDrive/results/Places365 Inpainting/phase 2"
 
   cuda: True
   lr: 0.001
@@ -19,8 +19,8 @@ settings:
   num_epochs: 100
 
   lambda_G: 1.0
-  lambda_rec_1: 100.0
-  lambda_rec_2: 100.0
+  lambda_rec_1: 10.0
+  lambda_rec_2: 10.0
   lambda_per: 1.0
 
   img_size: 256

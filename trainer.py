@@ -151,7 +151,7 @@ class Trainer():
                     real_D = None
 
                     # Train Generator
-                    self.optimizer_G.zero_grad()
+                    self.optimizer_D.zero_grad()
 
                     fake_D = self.model_D(second_out_wholeimg)
                     loss_G = self.criterion_adv(fake_D, target_is_real=True)
