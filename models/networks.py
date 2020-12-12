@@ -266,3 +266,6 @@ class PerceptualNet(nn.Module):
             y = block(y)
             loss += torch.nn.functional.l1_loss(x, y)
         return loss
+
+
+
