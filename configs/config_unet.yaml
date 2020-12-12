@@ -5,7 +5,7 @@ settings:
 
   cuda: True
   lr: 0.001
-  batch_size: 8
+  batch_size: 12
   num_workers: 4
 
   step_iters: [50000, 75000, 100000]
@@ -13,13 +13,13 @@ settings:
 
   d_num_layers: 3
 
-  visualize_per_iter: 500
-  save_per_iter: 500
+  visualize_per_iter: 1000
+  save_per_iter: 1000
   print_per_iter: 10
   num_epochs: 100
 
   lambda_G: 1.0
-  lambda_rec: 1.0
+  lambda_rec: 10.0
   lambda_per: 1.0
 
   img_size: 256

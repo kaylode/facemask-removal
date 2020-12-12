@@ -85,7 +85,7 @@ class Trainer():
         if args.resume is not None:
             load_checkpoint(self.model_G, self.model_D, args.resume)
 
-        self.criterion_adv = GANLoss()
+        self.criterion_adv = GANLoss(target_real_label=0.9, target_fake_label=0.1)
         self.criterion_rec = nn.SmoothL1Loss()
         self.criterion_ssim = SSIM(window_size = 11)
         self.criterion_per = nn.SmoothL1Loss()
