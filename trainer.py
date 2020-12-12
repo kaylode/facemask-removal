@@ -152,6 +152,7 @@ class Trainer():
 
                     # Train Generator
                     self.optimizer_D.zero_grad()
+                    self.optimizer_G.zero_grad()
 
                     fake_D = self.model_D(second_out_wholeimg)
                     loss_G = self.criterion_adv(fake_D, target_is_real=True)
@@ -164,8 +165,8 @@ class Trainer():
                     loss_ssim_1 = self.criterion_ssim(first_out_wholeimg, imgs)
                     loss_ssim_2 = self.criterion_ssim(second_out_wholeimg, imgs)
 
-                    loss_rec_1 = loss_l1_1 + (1 - loss_ssim_1)
-                    loss_rec_2 = loss_l1_2 + (1 - loss_ssim_2)
+                    loss_rec_1 = (1-0.84) * loss_l1_1 + 0.84 * (1 - loss_ssim_1)
+                    loss_rec_2 = (1-0.84) * loss_l1_2 + 0.84 * (1 - loss_ssim_2)
 
                     # Perceptual loss
                     loss_P  = self.model_P(second_out_wholeimg, imgs)                          
