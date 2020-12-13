@@ -6,7 +6,7 @@ class GANLoss(nn.Module):
         super(GANLoss, self).__init__()
         self.register_buffer('real_label', torch.tensor(target_real_label))
         self.register_buffer('fake_label', torch.tensor(target_fake_label))
-        self.loss = nn.BCELoss()
+        self.loss = nn.MSELoss()
 
     def get_target_tensor(self, input, target_is_real):
         if target_is_real:

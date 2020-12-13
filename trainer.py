@@ -79,7 +79,7 @@ class Trainer():
         self.num_iters = (self.num_epochs+1) * len(self.trainloader)
 
         self.model_G = GatedGenerator().to(self.device)
-        self.model_D = NLayerDiscriminator(cfg.d_num_layers, use_sigmoid=True).to(self.device)
+        self.model_D = NLayerDiscriminator(cfg.d_num_layers, use_sigmoid=False).to(self.device)
         self.model_P = PerceptualNet(name = "vgg16", resize=False).to(self.device)
 
         if args.resume is not None:
