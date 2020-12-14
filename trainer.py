@@ -14,7 +14,7 @@ from torchvision.utils import save_image
 
 from models import *
 from losses import *
-from datasets import Places365Dataset
+from datasets import Places365Dataset, FacemaskDataset
 
 
 def adjust_learning_rate(optimizer, gamma, num_steps=1):
@@ -52,6 +52,11 @@ class Trainer():
             epoch = 0
             iters = 0
 
+        if not os.path.exists(cfg.checkpoint_path):
+            os.makedirs(cfg.checkpoint_path)
+        if not os.path.exists(cfg.sample_folder):
+            os.makedirs(cfg.sample_folder)
+
         self.cfg = cfg
         self.step_iters = cfg.step_iters
         self.gamma = cfg.gamma
@@ -64,7 +69,7 @@ class Trainer():
         self.num_epochs = cfg.num_epochs
         self.device = torch.device('cuda' if cfg.cuda else 'cpu')
 
-        trainset = Places365Dataset(cfg)
+        trainset = FacemaskDataset(cfg) # Places365Dataset(cfg) #
 
         self.trainloader = data.DataLoader(
             trainset, 

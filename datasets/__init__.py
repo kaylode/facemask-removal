@@ -1,1 +1,1 @@
-from .dataset import Places365Dataset
+from .dataset import Places365Dataset, FacemaskDataset
