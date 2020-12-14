@@ -1,11 +1,11 @@
 settings:
   root_dir: "./datasets/facemask_inpainting"
-  checkpoint_path: "/content/drive/MyDrive/weights/Places365 Inpainting/facemask/phase 1"
-  sample_folder: "/content/drive/MyDrive/results/Places365 Inpainting/facemask/phase 1"
+  checkpoint_path: "/content/drive/MyDrive/weights/Image Inpainting/facemask/phase 1"
+  sample_folder: "/content/drive/MyDrive/results/Image Inpainting/facemask/phase 1"
 
   cuda: True
   lr: 0.001
-  batch_size: 8
+  batch_size: 4
   num_workers: 4
 
   step_iters: [50000, 75000, 100000]
@@ -19,9 +19,9 @@ settings:
   num_epochs: 100
 
   lambda_G: 1.0
-  lambda_rec_1: 10.0
-  lambda_rec_2: 10.0
-  lambda_per: 1.0
+  lambda_rec_1: 100.0
+  lambda_rec_2: 100.0
+  lambda_per: 10.0
 
   img_size: 512
 
