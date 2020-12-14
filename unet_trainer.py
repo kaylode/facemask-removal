@@ -4,6 +4,7 @@ import time
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -15,7 +16,7 @@ from torchvision.utils import save_image
 from models import UNetSemantic
 from losses import DiceLoss
 from datasets import FacemaskSegDataset
-
+from metrics import *
 
 def adjust_learning_rate(optimizer, gamma, num_steps=1):
     for i in range(num_steps):
@@ -61,11 +62,11 @@ class UNetTrainer():
         self.start_iter = iters
         self.iters = 0
         self.num_epochs = cfg.num_epochs
-        self.device = torch.device('cuda:0' if cfg.cuda else 'cpu')
+        self.device = torch.device('cuda:1' if cfg.cuda else 'cpu')
 
         trainset = FacemaskSegDataset(cfg)
         valset = FacemaskSegDataset(cfg, train=False)
-
+   
         self.trainloader = data.DataLoader(
             trainset, 
             batch_size=cfg.batch_size,
@@ -110,9 +111,9 @@ class UNetTrainer():
     def train_epoch(self):
         self.model.train()
         running_loss = {
-                'T': 0,
                 'DICE': 0,
                 'BCE':0,
+                 'T': 0,
             }
         running_time = 0
 
@@ -125,8 +126,8 @@ class UNetTrainer():
             
             outputs = self.model(inputs)
 
-            loss_bce = criterion_bce(outputs, targets)
-            loss_dice = criterion_dice(outputs, targets)
+            loss_bce = self.criterion_bce(outputs, targets)
+            loss_dice = self.criterion_dice(outputs, targets)
             loss = loss_bce + loss_dice
             loss.backward()
             self.optimizer.step()
@@ -141,42 +142,42 @@ class UNetTrainer():
             if self.iters % self.print_per_iter == 0:
                 for key in running_loss.keys():
                     running_loss[key] /= self.print_per_iter
+                    running_loss[key] = np.round(running_loss[key], 5)
                 loss_string = '{}'.format(running_loss)[1:-1].replace("'",'').replace(",",' ||')
-                
+                running_time = np.round(running_time, 5)
                 print('[{}/{}][{}/{}] || {} || Time: {}s'.format(self.epoch, self.num_epochs, self.iters, self.num_iters, loss_string,  running_time))
                 running_time = 0
                 running_loss = {
-                    'T': 0,
                     'DICE': 0,
-                    'BCE':0,
+                    'BCE':0, 
+                    'T': 0,
                 }
 
 
             if self.iters % self.save_per_iter  == 0:
-                torch.save(
-                    self.model.state_dict(),
-                    os.path.join(
+                save_path = os.path.join(
                         self.cfg.checkpoint_path, 
-                        f"model_segm_{self.epoch}_{self.iters}.pth"))
-    
+                        f"model_segm_{self.epoch}_{self.iters}.pth")
+                torch.save(self.model.state_dict(),save_path)
+                print(f'Save model at {save_path}')
             self.iters +=1
 
     def validate_epoch(self):
         #Validate
         
         self.model.eval()
-        # metrics = [DiceScore(1), PixelAccuracy(1)]
+        metrics = [DiceScore(1), PixelAccuracy(1)]
         running_loss = {
-            'T': 0,
             'DICE': 0,
             'BCE':0,
+             'T': 0,
         }
 
         running_time = 0
         print('=============================EVALUATION===================================')
         with torch.no_grad():
             start_time = time.time()
-            for idx, batch in enumerate(self.valloader):
+            for idx, batch in enumerate(tqdm(self.valloader)):
                 
                 inputs = batch['imgs'].to(self.device)
                 targets = batch['masks'].to(self.device)
@@ -187,20 +188,21 @@ class UNetTrainer():
                 running_loss['T'] += loss.item()
                 running_loss['DICE'] += loss_dice.item()
                 running_loss['BCE'] += loss_bce.item()
-                # for metric in metrics:
-                #     metric.update(outputs.cpu(), targets.cpu())
+                for metric in metrics:
+                    metric.update(outputs.cpu(), targets.cpu())
 
             end_time = time.time()
             running_time += (end_time - start_time)
-            
+            running_time = np.round(running_time, 5)
             for key in running_loss.keys():
                 running_loss[key] /= len(self.valloader)
+                running_loss[key] = np.round(running_loss[key], 5)
 
             loss_string = '{}'.format(running_loss)[1:-1].replace("'",'').replace(",",' ||')
             
             print('[{}/{}] || Validation || {} || Time: {}s'.format(self.epoch, self.num_epochs, loss_string, running_time))
-            # for metric in metrics:
-            #     print(metric)
+            for metric in metrics:
+                print(metric)
             print('==========================================================================')
         
 

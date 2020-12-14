@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 import pandas as pd
-
+from PIL import Image
 
 class FacemaskSegDataset(data.Dataset):
     def __init__(self, cfg, train=True):
@@ -27,6 +27,8 @@ class FacemaskSegDataset(data.Dataset):
             _ , img_name, mask_name = rows
             img_path = os.path.join(self.root_dir, img_name)
             mask_path = os.path.join(self.root_dir, mask_name)
+            img_path = img_path.replace('\\','/')
+            mask_path = mask_path.replace('\\','/')
             if os.path.isfile(mask_path): 
                 self.fns.append([img_path, mask_path])
 
