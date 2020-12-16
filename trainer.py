@@ -170,8 +170,8 @@ class Trainer():
                     loss_ssim_1 = self.criterion_ssim(first_out_wholeimg, imgs)
                     loss_ssim_2 = self.criterion_ssim(second_out_wholeimg, imgs)
 
-                    loss_rec_1 = (1-0.84) * loss_l1_1 + 0.84 * (1 - loss_ssim_1)
-                    loss_rec_2 = (1-0.84) * loss_l1_2 + 0.84 * (1 - loss_ssim_2)
+                    loss_rec_1 = 0.5 * loss_l1_1 + 0.5 * (1 - loss_ssim_1)
+                    loss_rec_2 = 0.5 * loss_l1_2 + 0.5 * (1 - loss_ssim_2)
 
                     # Perceptual loss
                     loss_P  = self.model_P(second_out_wholeimg, imgs)                          

@@ -256,8 +256,8 @@ class PerceptualNet(nn.Module):
         inputs = (inputs-self.mean) / self.std
         targets = (targets-self.mean) / self.std
         if self.resize:
-            inputs = self.transform(inputs, mode='bilinear', size=(256, 256), align_corners=False)
-            targets = self.transform(targets, mode='bilinear', size=(256, 256), align_corners=False)
+            inputs = self.transform(inputs, mode='bilinear', size=(512, 512), align_corners=False)
+            targets = self.transform(targets, mode='bilinear', size=(512, 512), align_corners=False)
         loss = 0.0
         x = inputs
         y = targets
