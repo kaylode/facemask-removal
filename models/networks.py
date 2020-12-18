@@ -113,69 +113,6 @@ class GatedGenerator(nn.Module):
         return first_out, second_out
 
 
-class GatedGenerator(nn.Module):
-    def __init__(self, in_channels=4, latent_channels=64, out_channels=3):
-        super(GatedGenerator, self).__init__()
-        self.coarse = nn.Sequential(
-            # encoder
-            GatedConv2d(in_channels, latent_channels, 7, 1, 3, norm = None),
-            GatedConv2d(latent_channels, latent_channels * 2, 4, 2, 1),
-            GatedConv2d(latent_channels * 2, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 4, 2, 1),
-            # Bottleneck
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 2, dilation = 2),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 4, dilation = 4),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 8, dilation = 8),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 16, dilation = 16),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            # decoder
-            TransposeGatedConv2d(latent_channels * 4, latent_channels * 2, 3, 1, 1),
-            GatedConv2d(latent_channels * 2, latent_channels * 2, 3, 1, 1),
-            TransposeGatedConv2d(latent_channels * 2, latent_channels, 3, 1, 1),
-            GatedConv2d(latent_channels, out_channels, 7, 1, 3, activation = 'tanh', norm = None)
-        )
-        self.refinement = nn.Sequential(
-            # encoder
-            GatedConv2d(in_channels, latent_channels, 7, 1, 3, norm = None),
-            GatedConv2d(latent_channels, latent_channels * 2, 4, 2, 1),
-            GatedConv2d(latent_channels * 2, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 4, 2, 1),
-            # Bottleneck
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 2, dilation = 2),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 4, dilation = 4),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 8, dilation = 8),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 16, dilation = 16),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            GatedConv2d(latent_channels * 4, latent_channels * 4, 3, 1, 1),
-            # decoder
-            TransposeGatedConv2d(latent_channels * 4, latent_channels * 2, 3, 1, 1),
-            GatedConv2d(latent_channels * 2, latent_channels * 2, 3, 1, 1),
-            TransposeGatedConv2d(latent_channels * 2, latent_channels, 3, 1, 1),
-            GatedConv2d(latent_channels, out_channels, 7, 1, 3, activation = 'tanh', norm = None)
-        )
-        
-    def forward(self, img, mask):
-        # img: entire img
-        # mask: 1 for mask region; 0 for unmask region
-        # 1 - mask: unmask
-        # img * (1 - mask): ground truth unmask region
-        # Coarse
-     
-        first_masked_img = img * (1 - mask) + mask
-        first_in = torch.cat((first_masked_img, mask), 1)       # in: [B, 4, H, W]
-        first_out = self.coarse(first_in)                       # out: [B, 3, H, W]
-        # Refinement
-        second_masked_img = img * (1 - mask) + first_out * mask
-        second_in = torch.cat((second_masked_img, mask), 1)     # in: [B, 4, H, W]
-        second_out = self.refinement(second_in)                 # out: [B, 3, H, W]
-        return first_out, second_out
-
-
 class NLayerDiscriminator(nn.Module):
     def __init__(self, input_nc, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d, use_sigmoid=False):
         super(NLayerDiscriminator, self).__init__()

@@ -1,11 +1,11 @@
 settings:
   root_dir: "./datasets/facemask_inpainting"
-  checkpoint_path: "/content/drive/MyDrive/weights/Image Inpainting/facemask/phase 1"
-  sample_folder: "/content/drive/MyDrive/results/Image Inpainting/facemask/phase 1"
+  checkpoint_path: "/content/drive/MyDrive/weights/Image Inpainting/facemask/phase 2"
+  sample_folder: "/content/drive/MyDrive/results/Image Inpainting/facemask/phase 2"
 
   cuda: True
   lr: 0.001
-  batch_size: 4
+  batch_size: 2
   num_workers: 4
 
   step_iters: [50000, 75000, 100000]
