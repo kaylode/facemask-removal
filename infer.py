@@ -5,7 +5,7 @@ from torchvision.utils import save_image
 import numpy as np
 from PIL import Image
 import cv2
-from models import UNetSemantic
+from models import UNetSemantic, GatedGenerator
 import argparse
 from configs import Config
 
@@ -16,6 +16,10 @@ class Predictor():
         self.masking = UNetSemantic().to(self.device)
         self.masking.load_state_dict(torch.load('weights\model_segm_5_35000.pth', map_location='cpu'))
         self.masking.eval()
+
+        self.inpaint = GatedGenerator().to(self.device)
+        self.inpaint.load_state_dict(torch.load('weights/model_6_103500.pth', map_location='cpu')['G'])
+        self.inpaint.eval()
 
     def save_image(self, img_list, save_img_path, nrow):
         img_list  = [i.clone().cpu() for i in img_list]
@@ -32,18 +36,19 @@ class Predictor():
         img = img.unsqueeze(0).to(self.device)
         with torch.no_grad():
             outputs = self.masking(img)
+            _, out = self.inpaint(img, outputs)
+            inpaint = img * (1 - outputs) + out * outputs
         masks = torch.cat([outputs, outputs, outputs], dim=1)
         
 
          
-        self.save_image([img, masks], outpath, nrow=2)
+        self.save_image([img, masks, inpaint], outpath, nrow=3)
 
         
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training custom model')
-    parser.add_argument('--resume', default=None, type=str, help='resume training')
     parser.add_argument('--image', default=None, type=str, help='resume training')
     parser.add_argument('config', default='config', type=str, help='config training')                         
     args = parser.parse_args() 
