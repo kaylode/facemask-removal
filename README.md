@@ -1,4 +1,8 @@
-# Image Inpainting
+# Impainting the Masked Face using Gated Convolution (Pytorch)
+
+## Environments
+- Windows 10
+- Pytorch 1.6
 
 ## Pipeline:
 - Data preparation:
@@ -6,22 +10,36 @@
   - Create synthesis facemask segmentation dataset with [here](https://github.com/aqeelanwar/MaskTheFace)
  
 - Edit configs on both ***segm.yaml*** and ***facemask.yaml***
-- Train segmentation model
-- Train impainting model
+- Train segmentation model in ***unet_trainer.py***
+- Train impainting model in ***trainer.py***
 
-## Train segmentation
-
-```
-python train.py segm
-```
-
-## Train impainting
+## Train facemask segmentation
 
 ```
-python train.py facemask
+python train.py segm --resume=<resume checkpoint>
 ```
 
-## References:
-- Idea from https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9019697
+## Train facemask impainting
+
+```
+python train.py facemask --resume=<resume checkpoint>
+```
+
+## Results:
+| | |
+|:-------------------------:|:-------------------------:|
+|<img width="900" alt="screen" src="sample/results1.png"> | <img width="900" alt="screen" src="sample/results2.png"> |
+
+<p align="center">
+Impainting results (from left to right: Masked - Segmented - Impainting - Ground Truth)
+</p>
+
+## Paper References:
+- Idea and training process from [A Novel GAN-Based Network for Unmasking of Masked Face](https://ieeexplore.ieee.org/abstract/document/9019697)
+- Base model from [Free-Form Image Inpainting with Gated Convolution](https://arxiv.org/abs/1806.03589)
+
+## Code References
+- https://github.com/zhaoyuzhi/deepfillv2
+- https://github.com/avalonstrel/GatedConvolution_pytorch
 - https://github.com/LynnHo/HD-CelebA-Cropper
 - https://github.com/aqeelanwar/MaskTheFace
