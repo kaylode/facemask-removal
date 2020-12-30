@@ -1,4 +1,4 @@
-# Impainting the Masked Face using Gated Convolution (Pytorch)
+# Inpainting the Masked Face using Gated Convolution (Pytorch)
 
 ## Environments
 - Windows 10
@@ -11,7 +11,7 @@
  
 - Edit configs on both ***segm.yaml*** and ***facemask.yaml***
 - Train segmentation model in ***unet_trainer.py***
-- Train impainting model in ***trainer.py***
+- Train inpainting model in ***trainer.py***
 
 ## Train facemask segmentation
 
@@ -19,7 +19,7 @@
 python train.py segm --resume=<resume checkpoint>
 ```
 
-## Train facemask impainting
+## Train facemask inpainting
 
 ```
 python train.py facemask --resume=<resume checkpoint>
@@ -31,7 +31,15 @@ python train.py facemask --resume=<resume checkpoint>
 |<img width="900" alt="screen" src="sample/results1.png"> | <img width="900" alt="screen" src="sample/results2.png"> |
 
 <p align="center">
-Impainting results (from left to right: Masked - Segmented - Impainting - Ground Truth)
+Inpainting results on Masked CelebA-512 (from left to right: FaceMasked - Segmented - Inpainted - Ground Truth)
+</p>
+
+| | |
+|:-------------------------:|:-------------------------:|
+|<img width="900" alt="screen" src="sample/results3.png"> | <img width="900" alt="screen" src="sample/reesults4.png"> |
+
+<p align="center">
+Free-Form Inpainting results on Places365-256 (from left to right: Ground Truth - Masked - Inpainted )
 </p>
 
 ## Paper References:
