@@ -1,4 +1,4 @@
-# Inpainting the Masked Face using Gated Convolution (Pytorch)
+# Inpainting the Masked Face using Gated Convolution + PatchGAN (Pytorch)
 
 ## Environments
 - Windows 10
@@ -47,7 +47,8 @@ Free-Form Inpainting results on Places365-256 (from left to right: Ground Truth 
 - Base model from [Free-Form Image Inpainting with Gated Convolution](https://arxiv.org/abs/1806.03589)
 
 ## Code References
-- https://github.com/zhaoyuzhi/deepfillv2
+- Generator from https://github.com/zhaoyuzhi/deepfillv2
+- Discriminator from https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
 - https://github.com/avalonstrel/GatedConvolution_pytorch
 - https://github.com/LynnHo/HD-CelebA-Cropper
 - https://github.com/aqeelanwar/MaskTheFace
