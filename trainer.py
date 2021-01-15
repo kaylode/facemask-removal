@@ -123,6 +123,7 @@ class Trainer():
         }
 
         running_time = 0
+        step = 0
         try:
             for epoch in range(self.epoch, self.num_epochs):
                 self.epoch = epoch
@@ -215,6 +216,12 @@ class Trainer():
                             'D': self.model_D.state_dict(),
                             'G': self.model_G.state_dict(),
                         }, os.path.join(self.cfg.checkpoint_path, f"model_{self.epoch}_{self.iters}.pth"))
+
+                    # Step learning rate
+                    if self.iters == self.step_iters[step]:
+                        adjust_learning_rate(self.optimizer_D, self.gamma)
+                        adjust_learning_rate(self.optimizer_G, self.gamma)
+                        step+=1
                
                     # Visualize sample
                     if self.iters % self.visualize_per_iter == 0:

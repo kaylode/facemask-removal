@@ -1,5 +1,5 @@
 settings:
-  root_dir: "./datasets/facemask_inpainting"
+  root_dir: "./datasets/celeba/images/"
   checkpoint_path: "/content/drive/MyDrive/weights/Image Inpainting/facemask/phase 2"
   sample_folder: "/content/drive/MyDrive/results/Image Inpainting/facemask/phase 2"
 

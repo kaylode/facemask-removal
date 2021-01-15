@@ -1,7 +1,7 @@
 settings:
-  root_dir: "./datasets/facemask_segmetation/images"
-  train_anns: "./datasets/facemask_segmetation/annotations/train.csv"
-  val_anns: "./datasets/facemask_segmetation/annotations/val.csv"
+  root_dir: "./datasets/celeba/images"
+  train_anns: "./datasets/celeba/annotations/train.csv"
+  val_anns: "./datasets/celeba/annotations/val.csv"
 
   checkpoint_path: 'weights' #"/content/drive/MyDrive/weights/Places365 Inpainting/unet/phase 1"
   sample_folder: 'sample' #"/content/drive/MyDrive/results/Places365 Inpainting/unet/phase 1"
