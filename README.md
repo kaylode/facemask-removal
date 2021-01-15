@@ -4,14 +4,50 @@
 - Windows 10
 - Pytorch 1.6
 
-## Pipeline:
-- Data preparation:
-  - Download CelebA dataset then crop the image but keeps while keeping ratio with [here](https://github.com/LynnHo/HD-CelebA-Cropper)
-  - Create synthesis facemask segmentation dataset with [here](https://github.com/aqeelanwar/MaskTheFace)
- 
-- Edit configs on both ***segm.yaml*** and ***facemask.yaml***
+## CelebA data preparation:
+
+  - Download CelebA dataset then crop the image while keeping ratio with [here](https://github.com/LynnHo/HD-CelebA-Cropper)
+  - Create synthesis facemask segmentation dataset on the cropped set with [here](https://github.com/aqeelanwar/MaskTheFace) 
+  **(orginal code does not provide binary masks, add it yourself)**
+  
+  ![](./sample/facemask.png)
+  
+  - Folder structure:
+  ```
+  this repo
+  │   train.py
+  │   trainer.py
+  │   unet_trainer.py
+  │
+  └───configs
+  │      facemask.yaml
+  │      segm.yaml
+  │
+  └───datasets  
+  │   └───celeba
+  │       └───images
+  │           └───celeba512_30k
+  │           └───celeba512_30k_binary
+  │           └───celeba512_30k_masked
+  │       └───annotations
+  │           |  train.csv
+  │           |  val.csv
+  ```
+  - Put unmasked images in ```celeba512_30k```, facemasked images in ```celeba512_30k_masked```, and binary masks in ```celeba512_30k_binary```
+  - Split train/validation then save filepaths to .csv. Example:
+      ```
+      ,img_name,mask_name
+      0,celeba512_30k_masked\012653_masked.jpg,celeba512_30k_binary\012653_binary.jpg
+      1,celeba512_30k_masked\016162_masked.jpg,celeba512_30k_binary\016162_binary.jpg
+      2,celeba512_30k_masked\011913_masked.jpg,celeba512_30k_binary\011913_binary.jpg
+      ```
+  - Edit configs on both ***segm.yaml*** and ***facemask.yaml***
+  - **Follow the same steps above when applying custom dataset**
+  
+## Training steps:
 - Train segmentation model in ***unet_trainer.py***
 - Train inpainting model in ***trainer.py***
+- Using ***infer.py*** with 2 checkpoints from above tasks to do inference
 
 ## Train facemask segmentation
 
@@ -25,7 +61,7 @@ python train.py segm --resume=<resume checkpoint>
 python train.py facemask --resume=<resume checkpoint>
 ```
 
-## Results:
+## Results (100,000 iterations with batch size = 2):
 | | |
 |:-------------------------:|:-------------------------:|
 |<img width="900" alt="screen" src="sample/results1.png"> | <img width="900" alt="screen" src="sample/results2.png"> |
