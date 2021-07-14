@@ -1,4 +1,4 @@
-# Inpainting the Masked Face using Gated Convolution + PatchGAN (Pytorch)
+# FaceMask Removal (FaceMask Inpainting)
 
 ## Environments
 - Windows 10
