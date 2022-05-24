@@ -41,6 +41,7 @@
       1,celeba512_30k_masked\016162_masked.jpg,celeba512_30k_binary\016162_binary.jpg
       2,celeba512_30k_masked\011913_masked.jpg,celeba512_30k_binary\011913_binary.jpg
       ```
+      caution! If you create a csv list as a data frame, it cannot be recognized, so use csv.writer.writerow to create it.
   - Edit configs on both ***segm.yaml*** and ***facemask.yaml***
   - **Follow the same steps above when applying custom dataset**
   
